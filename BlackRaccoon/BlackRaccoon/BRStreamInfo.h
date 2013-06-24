@@ -104,6 +104,7 @@
 @property long timeout;
 @property BOOL cancelRequestFlag;
 @property BOOL cancelDoesNotCallDelegate;
+@property BOOL wasCanceled;
 
 - (void) openRead: (BRRequest *) request;
 - (void) openWrite: (BRRequest *) request;

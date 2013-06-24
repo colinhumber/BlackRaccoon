@@ -293,6 +293,7 @@ dispatch_queue_t dispatch_get_local_queue()
     //----- otherwise indicate that the request to cancel was completed
     else
     {
+		self.wasCanceled = YES;
         [request.delegate requestCompleted: request];
         [request.streamInfo close: request];
     }

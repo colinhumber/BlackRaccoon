@@ -137,6 +137,7 @@
 @property (readonly) long bytesSent;                                            // will have bytes from the last FTP call
 @property (readonly) long totalBytesSent;                                       // will have bytes total sent
 @property BOOL cancelDoesNotCallDelegate;                                       // cancel closes stream without calling delegate
+@property (readonly) BOOL wasCanceled;											// returns whether a request was canceled. Useful when inspecting a request in requestCompleted:
 
 - (NSURL *)fullURLWithEscape;
 

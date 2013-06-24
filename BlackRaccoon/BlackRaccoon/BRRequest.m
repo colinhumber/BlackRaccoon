@@ -109,7 +109,7 @@
 @synthesize delegate;
 @synthesize streamInfo;
 @synthesize didOpenStream;
-
+@synthesize wasCanceled;
 
 //-----
 //
@@ -454,6 +454,10 @@
 - (BOOL)cancelDoesNotCallDelegate
 {
     return self.streamInfo.cancelDoesNotCallDelegate;
+}
+
+- (BOOL)wasCanceled {
+	return self.streamInfo.wasCanceled;
 }
 
 
