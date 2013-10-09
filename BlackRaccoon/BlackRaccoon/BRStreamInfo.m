@@ -9,11 +9,11 @@
 //
 // created:		Jul 04, 2012
 //
-// description:	
+// description:
 //
 // notes:		none
 //
-// revisions:	
+// revisions:
 //
 // license:     Permission is hereby granted, free of charge, to any person obtaining a copy
 //              of this software and associated documentation files (the "Software"), to deal
@@ -95,7 +95,7 @@
 
 @implementation BRStreamInfo
 
-@synthesize writeStream;    
+@synthesize writeStream;
 @synthesize readStream;
 @synthesize bytesThisIteration;
 @synthesize bytesTotal;
@@ -164,7 +164,7 @@ dispatch_queue_t dispatch_get_local_queue()
     
     CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
 	CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyFTPUsePassiveMode, request.passiveMode ? kCFBooleanTrue : kCFBooleanFalse);
-//    CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
+    CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
     CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyFTPFetchResourceInfo, kCFBooleanTrue);
     CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyFTPUserName, (__bridge CFStringRef) request.username);
     CFReadStreamSetProperty(readStreamRef, kCFStreamPropertyFTPPassword, (__bridge CFStringRef) request.password);
@@ -229,7 +229,7 @@ dispatch_queue_t dispatch_get_local_queue()
     
     CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
 	CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyFTPUsePassiveMode, request.passiveMode ? kCFBooleanTrue : kCFBooleanFalse);
-//   CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
+	CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyFTPAttemptPersistentConnection, kCFBooleanFalse);
     CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyFTPFetchResourceInfo, kCFBooleanTrue);
     CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyFTPUserName, (__bridge CFStringRef) request.username);
     CFWriteStreamSetProperty(writeStreamRef, kCFStreamPropertyFTPPassword, (__bridge CFStringRef) request.password);
@@ -322,7 +322,7 @@ dispatch_queue_t dispatch_get_local_queue()
 {
     NSData *data;
     NSMutableData *bufferObject = [NSMutableData dataWithLength: kBRDefaultBufferSize];
-
+	
     bytesThisIteration = [readStream read: (UInt8 *) [bufferObject bytes] maxLength:kBRDefaultBufferSize];
     bytesTotal += bytesThisIteration;
     
@@ -343,7 +343,7 @@ dispatch_queue_t dispatch_get_local_queue()
     
     //----- return no data, but this isn't an error... just the end of the file
     else if (bytesThisIteration == 0)
-        return [NSData data];                                                   // returns empty data object - means no error, but no data 
+        return [NSData data];                                                   // returns empty data object - means no error, but no data
     
     //----- otherwise we had an error, return an error
     [self streamError: request errorCode: kBRFTPClientCantReadStream];
@@ -374,7 +374,7 @@ dispatch_queue_t dispatch_get_local_queue()
 {
     bytesThisIteration = [writeStream write: [data bytes] maxLength: [data length]];
     bytesTotal += bytesThisIteration;
-            
+	
     if (bytesThisIteration > 0)
     {
         request.percentCompleted = bytesTotal / request.maximumSize;
@@ -391,7 +391,7 @@ dispatch_queue_t dispatch_get_local_queue()
     
     [self streamError: request errorCode: kBRFTPClientCantWriteStream]; // perform callbacks and close out streams
     InfoLog(@"%@", request.error.message);
-
+	
     return FALSE;
 }
 
