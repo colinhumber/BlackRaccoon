@@ -12,11 +12,11 @@
 //
 // created:		Jul 04, 2012
 //
-// description:	
+// description:
 //
 // notes:		none
 //
-// revisions:	
+// revisions:
 //
 // license:     Permission is hereby granted, free of charge, to any person obtaining a copy
 //              of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@
 
 
 //---------- definitions
+#define SYSTEM_VERSION_LESS_THAN(v) ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 
 
 
@@ -119,7 +120,7 @@
 {
     NSString *fileName = [[fileNamePath lastPathComponent] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
     //NSString *fileName = [[self.path lastPathComponent] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
-
+	
     for (NSDictionary *file in self.filesInfo)
     {
         NSString * name = [file objectForKey:(id)kCFFTPResourceName];
@@ -152,7 +153,7 @@
 {
     //  the path will always point to a directory, so we add the final slash to it (if there was one before escaping/standardizing, it's *gone* now)
     NSString * directoryPath = [super path];
-    if (![directoryPath hasSuffix: @"/"]) 
+    if (![directoryPath hasSuffix: @"/"])
     {
         directoryPath = [directoryPath stringByAppendingString:@"/"];
     }
@@ -204,9 +205,9 @@
 {
     NSData *data;
     
-    switch (streamEvent) 
+    switch (streamEvent)
     {
-        case NSStreamEventOpenCompleted: 
+        case NSStreamEventOpenCompleted:
         {
 			self.filesInfo = [NSMutableArray array];
             self.didOpenStream = YES;
@@ -228,46 +229,48 @@
                 [self.streamInfo streamError: self errorCode: kBRFTPClientCantReadStream];
             }
         }
-        break;
+			break;
             
-        case NSStreamEventHasSpaceAvailable: 
+        case NSStreamEventHasSpaceAvailable:
         {
             
-        } 
-        break;
+        }
+			break;
             
-        case NSStreamEventErrorOccurred: 
+        case NSStreamEventErrorOccurred:
         {
             [self.streamInfo streamError: self errorCode: [BRRequestError errorCodeWithError: [theStream streamError]]];
             InfoLog(@"%@", self.error.message);
         }
-        break;
+			break;
             
-        case NSStreamEventEndEncountered: 
+        case NSStreamEventEndEncountered:
         {
             NSUInteger  offset = 0;
             CFIndex     parsedBytes;
             uint8_t *bytes = (uint8_t *)[self.receivedData bytes];
             int totalbytes = [self.receivedData length];
-           
+			
             //----- we have all the data for the directory listing. Now parse it.
             do
             {
                 CFDictionaryRef listingEntity = NULL;
                 
-                 parsedBytes = CFFTPCreateParsedResourceListing(NULL, &bytes[offset], totalbytes - offset, &listingEntity);
+				parsedBytes = CFFTPCreateParsedResourceListing(NULL, &bytes[offset], totalbytes - offset, &listingEntity);
                 
                 if (parsedBytes > 0)
                 {
                     if (listingEntity != NULL)
                     {
-                        //----- July 10, 2012: CFFTPCreateParsedResourceListing had a bug that had the date over retained
-                        //----- in order to fix this, we release it once. However, just as a precaution, we check to see what
-                        //----- the retain count might be (this isn't guaranteed to work).
-                        id date = [(__bridge NSDictionary *) listingEntity objectForKey: (id) kCFFTPResourceModDate];
-                        if (CFGetRetainCount((__bridge CFTypeRef) date) >= 2)
-                            CFRelease((__bridge CFTypeRef) date);
-                        
+                        if (SYSTEM_VERSION_LESS_THAN(@"7.0"))
+                        {
+                            //----- July 10, 2012: CFFTPCreateParsedResourceListing had a bug that had the date over retained
+                            //----- in order to fix this, we release it once. However, just as a precaution, we check to see what
+                            //----- the retain count might be (this isn't guaranteed to work).
+                            id date = [(__bridge NSDictionary *) listingEntity objectForKey: (id) kCFFTPResourceModDate];
+                            if (CFGetRetainCount((__bridge CFTypeRef) date) >= 2)
+                                CFRelease((__bridge CFTypeRef) date);
+                        }
                         //----- transfer the directory into an ARC maintained array
                         self.filesInfo = [self.filesInfo arrayByAddingObject: (__bridge_transfer NSDictionary *) listingEntity];
                     }
@@ -275,11 +278,11 @@
                 }
                 
             } while (parsedBytes > 0);
-
+			
             [self.streamInfo streamComplete: self];                             // perform callbacks and close out streams
         }
-        break;
-        
+			break;
+			
         default:
             break;
     }
